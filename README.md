@@ -1,6 +1,6 @@
 # AgenticIntegrate AI
 
-![AgenticIntegrate AI Logo](https://via.placeholder.com/200x200?text=AgenticIntegrate+AI)
+![AgenticIntegrate AI Logo](assets/images/AgenticAI.png)
 
 **AgenticIntegrate AI** is an intelligent agentic integration platform that connects your business applications with natural language interfaces. Built by Jinvaanii AI in collaboration with Global AI Jaipur, this open-source project enables seamless interaction with various business tools through conversational AI.
 
@@ -117,7 +117,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 👥 Credits
 
-Developed by [Jinvaanii AI](https://jinvaanii.com) in collaboration with [Global AI Jaipur](https://globalai.community/).
+Developed by [Jinvaanii AI](https://jinvaanii.com) in collaboration with [Global AI Jaipur](https://globalai.community/chapters/jaipur/).
 
 ## 📧 Contact
 
