@@ -83,4 +83,4 @@ By contributing to AgenticIntegrate AI, you agree that your contributions will b
 
 ## Questions?
 
-If you have any questions about contributing, please open an issue or contact us at [devashish@jinvaanii.ai](mailto:devashish@jinvaanii.ai).
+If you have any questions about contributing, please open an issue or contact us at [devashish@jinvaanii.com](mailto:devashish@jinvaanii.com).
