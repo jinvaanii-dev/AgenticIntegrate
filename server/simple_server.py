@@ -14,7 +14,7 @@ import sys
 try:
     from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
     from langchain_core.output_parsers import StrOutputParser
-    from langchain_openai import AzureChatOpenAI
+    from langchain_openai import AzureChatOpenAI, ChatOpenAI
     from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
     from langchain.agents import AgentExecutor, create_openai_tools_agent
     from langchain.tools import BaseTool
@@ -64,19 +64,35 @@ headers = {
 if bearer_token and bearer_token != "your_developer_ai_bearer_token_here":
     headers["Authorization"] = f"Bearer {bearer_token}"
 
-# Initialize Azure OpenAI configuration if LangChain is available
+# Initialize LLM configuration if LangChain is available
 if LANGCHAIN_AVAILABLE:
+    # Check for Groq API key first
+    GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+    GROQ_MODEL = os.getenv("GROQ_MODEL", "meta-llama/llama-4-scout-17b-16e-instruct")
+    
+    # Check for Azure OpenAI configuration
     AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
     AZURE_OPENAI_API_BASE = os.getenv("AZURE_OPENAI_API_BASE")
     AZURE_OPENAI_API_VERSION = os.getenv("AZURE_OPENAI_API_VERSION")
     AZURE_OPENAI_DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
     
-    if not all([AZURE_OPENAI_API_KEY, AZURE_OPENAI_API_BASE, AZURE_OPENAI_API_VERSION, AZURE_OPENAI_DEPLOYMENT_NAME]):
-        print("WARNING: Azure OpenAI configuration is incomplete. LangChain agent will not be available.")
-        LANGCHAIN_AVAILABLE = False
-    else:
-        print("Azure OpenAI configuration initialized successfully")
-        
+    # Initialize LLM based on available configuration
+    if GROQ_API_KEY:
+        print("Groq API configuration detected")
+        try:
+            # Initialize the Groq LLM
+            llm = ChatOpenAI(
+                model=GROQ_MODEL,
+                api_key=GROQ_API_KEY,
+                temperature=0.7,
+                base_url="https://api.groq.com/openai/v1"
+            )
+            print(f"Groq LLM initialized successfully with model: {GROQ_MODEL}")
+        except Exception as e:
+            print(f"Error initializing Groq LLM: {e}")
+            LANGCHAIN_AVAILABLE = False
+    elif all([AZURE_OPENAI_API_KEY, AZURE_OPENAI_API_BASE, AZURE_OPENAI_API_VERSION, AZURE_OPENAI_DEPLOYMENT_NAME]):
+        print("Azure OpenAI configuration detected")
         try:
             # Initialize the Azure OpenAI LLM
             llm = AzureChatOpenAI(
@@ -90,14 +106,17 @@ if LANGCHAIN_AVAILABLE:
         except Exception as e:
             print(f"Error initializing Azure OpenAI LLM: {e}")
             LANGCHAIN_AVAILABLE = False
+    else:
+        print("WARNING: Neither Groq nor Azure OpenAI configuration is complete. LangChain agent will not be available.")
+        LANGCHAIN_AVAILABLE = False
 
-# Function to generate conversational responses using Azure OpenAI
+# Function to generate conversational responses using the configured LLM (Groq or Azure OpenAI)
 def generate_conversational_response(query: str, data: Dict[str, Any], object_type: str) -> Tuple[str, Dict[str, Any]]:
-    """Generate a conversational response using Azure OpenAI based on the query and data"""
-    # Default response if Azure OpenAI is not available
+    """Generate a conversational response using the configured LLM (Groq or Azure OpenAI) based on the query and data"""
+    # Default response if LLM is not available
     default_response = f"Found {len(data.get('results', []))} {object_type}."
     
-    # If Azure OpenAI is available, use it to generate a conversational response
+    # If LLM (Groq or Azure OpenAI) is available, use it to generate a conversational response
     if LANGCHAIN_AVAILABLE and 'llm' in globals():
         try:
             # Extract basic information about the results
@@ -193,9 +212,9 @@ class ChatResponse(BaseModel):
 async def root():
     return {"message": "Welcome to the Simple HubSpot API Server"}
 
-# Helper function to analyze query intent using Azure OpenAI
+# Helper function to analyze query intent using the configured LLM
 def analyze_query_intent(query: str) -> Tuple[str, Dict[str, Any]]:
-    """Analyze the intent of a natural language query and extract relevant parameters using Azure OpenAI"""
+    """Analyze the intent of a natural language query and extract relevant parameters using the configured LLM (Groq or Azure OpenAI)"""
     # Default values
     intent = "list"
     intent_data = {}
